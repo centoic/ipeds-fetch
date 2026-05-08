@@ -1,0 +1,56 @@
+{
+    "name": "@centoic/ipeds-download",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/centoic/ipeds-download.git"
+    },
+    "homepage": "https://github.com/centoic/ipeds-download#readme",
+    "bugs": {
+        "url": "https://github.com/centoic/ipeds-download/issues"
+    },
+    "keywords": [
+        "ipeds",
+        "nces",
+        "education",
+        "data",
+        "cli",
+        "download"
+    ],
+    "engines": {
+        "node": ">=20.0.0"
+    },
+    "files": [
+        "dist",
+        "LICENSE",
+        "README.md"
+    ],
+    "version": "0.1.0",
+    "description": "CLI tool and library for downloading IPEDS data files",
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "ipeds-download": "dist/cli/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "prepare": "npm run build",
+        "lint": "eslint .",
+        "typecheck": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@tsconfig/node20": "^20.1.4",
+        "@types/node": "^20.0.0",
+        "@types/unzipper": "^0.10.10",
+        "typescript": "^5.0.0",
+        "@typescript-eslint/eslint-plugin": "^6.7.4",
+        "@typescript-eslint/parser": "^6.7.4",
+        "eslint": "^8.38.0",
+        "prettier": "2.8.8"
+    },
+    "dependencies": {
+        "playwright": "^1.58.1",
+        "unzipper": "^0.12.3"
+    }
+}

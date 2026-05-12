@@ -1,4 +1,8 @@
-# @centoic/ipeds-download
+<p align="center">
+  <img src="assets/ipeds-fetch-logo.png" width="220" alt="IPEDS Fetch mascot — a seated cartoon dog">
+</p>
+
+# @centoic/ipeds-fetch
 
 A command-line tool and TypeScript library for downloading data files and data dictionaries from the [IPEDS](https://nces.ed.gov/ipeds/) (Integrated Postsecondary Education Data System) Complete Data Files repository maintained by NCES.
 
@@ -14,7 +18,7 @@ A command-line tool and TypeScript library for downloading data files and data d
 ## Quick Start
 
 ```bash
-npx @centoic/ipeds-download --years 2024 --tables "IC*" --list
+npx @centoic/ipeds-fetch --years 2024 --tables "IC*" --list
 ```
 
 ## Installation
@@ -22,20 +26,20 @@ npx @centoic/ipeds-download --years 2024 --tables "IC*" --list
 ### Global install
 
 ```bash
-npm install -g @centoic/ipeds-download
-ipeds-download --years 2024 --tables HD2024 --output ./data
+npm install -g @centoic/ipeds-fetch
+ipeds-fetch --years 2024 --tables HD2024 --output ./data
 ```
 
 ### Local install
 
 ```bash
-npm install @centoic/ipeds-download
+npm install @centoic/ipeds-fetch
 ```
 
 ## CLI Usage
 
 ```
-ipeds-download --years <spec> --tables <patterns> [options]
+ipeds-fetch --years <spec> --tables <patterns> [options]
 ```
 
 ### Required Options
@@ -83,22 +87,22 @@ Patterns use glob-style matching with `*` as the wildcard (case-insensitive).
 
 ```bash
 # List all institutional characteristics tables for 2024 (human-readable)
-ipeds-download --years 2024 --tables "IC*" --list
+ipeds-fetch --years 2024 --tables "IC*" --list
 
 # List all tables for 2010 in JSON format
-ipeds-download --years 2010 --tables "*" --list:json
+ipeds-fetch --years 2010 --tables "*" --list:json
 
 # Download HD2024 with its data dictionary
-ipeds-download --years 2024 --tables HD2024 --with-dictionaries
+ipeds-fetch --years 2024 --tables HD2024 --with-dictionaries
 
 # Download all enrollment tables for 2020-2024 with 500ms delay between downloads
-ipeds-download --years 2020-2024 --tables "EF*" --delay 500 --output ./enrollment-data
+ipeds-fetch --years 2020-2024 --tables "EF*" --delay 500 --output ./enrollment-data
 
 # Download specific tables across multiple years
-ipeds-download --years 2018-2022 --tables "HD*,IC*" --with-dictionaries
+ipeds-fetch --years 2018-2022 --tables "HD*,IC*" --with-dictionaries
 
 # Download everything for a single year
-ipeds-download --years 2024 --tables "*" --output ./ipeds-2024
+ipeds-fetch --years 2024 --tables "*" --output ./ipeds-2024
 ```
 
 ## Library API
@@ -111,7 +115,7 @@ import {
     downloadTables,
     downloadZipAndExtract,
     parseYearSpec,
-} from "@centoic/ipeds-download";
+} from "@centoic/ipeds-fetch";
 ```
 
 ### `fetchTablesForYears(years: number[]): Promise<TableMetadata[]>`
@@ -228,6 +232,12 @@ The IPEDS Data Center uses ASP.NET WebForms with no public API. This tool uses P
 3. Scrapes the resulting table listing (survey, title, table name, download URLs)
 4. Downloads zip files for matching tables
 5. Extracts CSV data files and XLSX/XLS dictionaries
+
+## Disclaimer
+
+This project is not affiliated with, endorsed by, or connected to the National Center for Education Statistics (NCES), the U.S. Department of Education, or any other government entity. All data is sourced from publicly available NCES IPEDS data files.
+
+Nothing in this repository constitutes investment advice, a recommendation, or an offer to buy or sell any security. Centoic is a registered investment adviser in California; however, this tool is provided as general-purpose open source software and is not part of any advisory service.
 
 ## License
 

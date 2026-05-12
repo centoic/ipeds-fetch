@@ -1,12 +1,12 @@
 # Contributing
 
-Thanks for your interest in contributing to `@centoic/ipeds-download`.
+Thanks for your interest in contributing to `@centoic/ipeds-fetch`.
 
 ## Getting Started
 
 ```bash
-git clone https://github.com/centoic/ipeds-download.git
-cd ipeds-download
+git clone https://github.com/centoic/ipeds-fetch.git
+cd ipeds-fetch
 npm install
 ```
 

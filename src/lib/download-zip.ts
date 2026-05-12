@@ -54,7 +54,7 @@ const delayFn = async (delayMs: number): Promise<void> => {
     });
 };
 
-class IpedsDownloadError extends Error {
+class IpedsFetchError extends Error {
     constructor(
         message: string,
         public readonly category: "download" | "extraction",
@@ -110,13 +110,13 @@ export const downloadZipAndExtract = async (
     outputDir: string
 ): Promise<DownloadZipResult> => {
     await mkdir(outputDir, { recursive: true });
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "ipeds-download-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "ipeds-fetch-"));
     const zipPath = path.join(tempDir, "download.zip");
 
     try {
         const response = await fetch(url);
         if (!response.ok) {
-            throw new IpedsDownloadError(
+            throw new IpedsFetchError(
                 `HTTP ${response.status} ${response.statusText}`,
                 "download",
                 response.status,
@@ -126,12 +126,12 @@ export const downloadZipAndExtract = async (
 
         await writeResponseToFile(response, zipPath);
     } catch (error) {
-        if (error instanceof IpedsDownloadError) {
+        if (error instanceof IpedsFetchError) {
             throw error;
         }
         const details = error instanceof Error ? error.message : String(error);
         await rm(tempDir, { recursive: true, force: true });
-        throw new IpedsDownloadError(details, "download");
+        throw new IpedsFetchError(details, "download");
     }
 
     try {
@@ -161,7 +161,7 @@ export const downloadZipAndExtract = async (
         return { files, originalPaths };
     } catch (error) {
         const details = error instanceof Error ? error.message : String(error);
-        throw new IpedsDownloadError(details, "extraction");
+        throw new IpedsFetchError(details, "extraction");
     } finally {
         await rm(tempDir, { recursive: true, force: true });
     }
@@ -274,10 +274,10 @@ export const downloadTables = async (
             const errorMessage =
                 error instanceof Error ? error.message : String(error);
             const isExtract =
-                error instanceof IpedsDownloadError &&
+                error instanceof IpedsFetchError &&
                 error.category === "extraction";
             const isHttpError =
-                error instanceof IpedsDownloadError &&
+                error instanceof IpedsFetchError &&
                 error.httpStatus !== undefined;
             onProgress?.(` failed\n`);
             onItemComplete?.(table, {
@@ -290,11 +290,11 @@ export const downloadTables = async (
                     url,
                     isHttpError,
                     httpStatus:
-                        error instanceof IpedsDownloadError
+                        error instanceof IpedsFetchError
                             ? error.httpStatus
                             : undefined,
                     httpStatusText:
-                        error instanceof IpedsDownloadError
+                        error instanceof IpedsFetchError
                             ? error.httpStatusText
                             : undefined,
                 },

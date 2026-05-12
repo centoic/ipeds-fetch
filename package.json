@@ -1,13 +1,13 @@
 {
-    "name": "@centoic/ipeds-download",
+    "name": "@centoic/ipeds-fetch",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/centoic/ipeds-download.git"
+        "url": "git+https://github.com/centoic/ipeds-fetch.git"
     },
-    "homepage": "https://github.com/centoic/ipeds-download#readme",
+    "homepage": "https://github.com/centoic/ipeds-fetch#readme",
     "bugs": {
-        "url": "https://github.com/centoic/ipeds-download/issues"
+        "url": "https://github.com/centoic/ipeds-fetch/issues"
     },
     "keywords": [
         "ipeds",
@@ -31,7 +31,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
-        "ipeds-download": "bin/ipeds-download.js"
+        "ipeds-fetch": "bin/ipeds-fetch.js"
     },
     "publishConfig": {
         "access": "public"

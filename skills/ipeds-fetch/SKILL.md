@@ -1,12 +1,12 @@
 ---
-name: ipeds-download
+name: ipeds-fetch
 description: "Download IPEDS (Integrated Postsecondary Education Data System) higher education data files and dictionaries. Use when the user needs postsecondary education data, college/university statistics, enrollment data, financial aid data, graduation rates, institutional characteristics, or any NCES IPEDS data. Triggers on: IPEDS data, education data, college data, university statistics, NCES data, higher education research."
 user-invocable: false
 ---
 
 # IPEDS Data Download
 
-Use `npx @centoic/ipeds-download` to discover, list, and download IPEDS postsecondary education datasets for research and analysis. The CLI runs via `npx` — no global install needed (Playwright Chromium must be installed once, see Prerequisites).
+Use `npx @centoic/ipeds-fetch` to discover, list, and download IPEDS postsecondary education datasets for research and analysis. The CLI runs via `npx` — no global install needed (Playwright Chromium must be installed once, see Prerequisites).
 
 ---
 
@@ -51,7 +51,7 @@ Requires Node.js >= 20. `npx` will download and cache the package on first use.
 ### Syntax
 
 ```
-npx @centoic/ipeds-download --years <spec> --tables <patterns> [options]
+npx @centoic/ipeds-fetch --years <spec> --tables <patterns> [options]
 ```
 
 ### Required Options
@@ -107,13 +107,13 @@ Always use `--list` first to explore what tables exist before downloading:
 
 ```bash
 # See all 2024 tables (human-readable table with columns: Year, Survey, Title, Data File)
-npx @centoic/ipeds-download --years 2024 --tables "*" --list
+npx @centoic/ipeds-fetch --years 2024 --tables "*" --list
 
 # List enrollment-related tables as JSON (easier to parse programmatically)
-npx @centoic/ipeds-download --years 2023 --tables "EF*" --list:json
+npx @centoic/ipeds-fetch --years 2023 --tables "EF*" --list:json
 
 # List institutional characteristics as TSV for spreadsheets
-npx @centoic/ipeds-download --years 2020-2024 --tables "IC*,HD*" --list:tsv
+npx @centoic/ipeds-fetch --years 2020-2024 --tables "IC*,HD*" --list:tsv
 ```
 
 **Output formats:**
@@ -125,19 +125,19 @@ npx @centoic/ipeds-download --years 2020-2024 --tables "IC*,HD*" --list:tsv
 
 ```bash
 # Download a single table
-npx @centoic/ipeds-download --years 2024 --tables HD2024 --output ./data
+npx @centoic/ipeds-fetch --years 2024 --tables HD2024 --output ./data
 
 # Download with data dictionary (essential for understanding column meanings)
-npx @centoic/ipeds-download --years 2024 --tables HD2024 --with-dictionaries --output ./data
+npx @centoic/ipeds-fetch --years 2024 --tables HD2024 --with-dictionaries --output ./data
 
 # Download all enrollment data across a year range
-npx @centoic/ipeds-download --years 2020-2024 --tables "EF*" --output ./enrollment-data
+npx @centoic/ipeds-fetch --years 2020-2024 --tables "EF*" --output ./enrollment-data
 
 # Download multiple survey categories at once
-npx @centoic/ipeds-download --years 2024 --tables "HD*,IC*,ADM*" --with-dictionaries --output ./ipeds-2024
+npx @centoic/ipeds-fetch --years 2024 --tables "HD*,IC*,ADM*" --with-dictionaries --output ./ipeds-2024
 
 # Download everything for one year
-npx @centoic/ipeds-download --years 2024 --tables "*" --output ./ipeds-2024
+npx @centoic/ipeds-fetch --years 2024 --tables "*" --output ./ipeds-2024
 ```
 
 ### 3. Rate Limiting for Bulk Downloads
@@ -145,7 +145,7 @@ npx @centoic/ipeds-download --years 2024 --tables "*" --output ./ipeds-2024
 Add a delay between downloads to be respectful to NCES servers:
 
 ```bash
-npx @centoic/ipeds-download --years 2000-2024 --tables "HD*" --delay 500 --output ./hd-data
+npx @centoic/ipeds-fetch --years 2000-2024 --tables "HD*" --delay 500 --output ./hd-data
 ```
 
 ### 4. Get Data Dictionaries
@@ -153,7 +153,7 @@ npx @centoic/ipeds-download --years 2000-2024 --tables "HD*" --delay 500 --outpu
 Data dictionaries (XLSX/XLS) explain each column in the CSV. Always download them when interpreting data:
 
 ```bash
-npx @centoic/ipeds-download --years 2024 --tables EF2024A --with-dictionaries --output ./data
+npx @centoic/ipeds-fetch --years 2024 --tables EF2024A --with-dictionaries --output ./data
 ```
 
 ---
@@ -170,7 +170,7 @@ import {
     downloadTables,
     downloadZipAndExtract,
     parseYearSpec,
-} from "@centoic/ipeds-download";
+} from "@centoic/ipeds-fetch";
 
 // Parse year specifications
 const { years, warnings } = parseYearSpec("2020-2024");

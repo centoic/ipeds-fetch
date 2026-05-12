@@ -1,5 +1,5 @@
 export const getUsage = (): string => {
-    return `Usage: ipeds-download --years <spec> --tables <patterns> [options]
+    return `Usage: ipeds-fetch --years <spec> --tables <patterns> [options]
 
 Options:
   --years <spec>         Year specification (required)

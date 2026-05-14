@@ -54,7 +54,7 @@ ipeds-fetch --years <spec> --tables <patterns> [options]
 | Option | Description |
 |--------|-------------|
 | `--list[:format]` | List matching tables instead of downloading. Formats: `text` (default), `json`, `tsv` |
-| `--with-dictionaries` | Also download data dictionaries (.xlsx/.xls) for each table |
+| `--with-dictionaries[:format]` | Also download data dictionaries (.xlsx/.xls) for each table. Use `:text` to convert .xlsx dictionaries to CSV |
 | `--output <dir>` | Output directory (default: current working directory) |
 | `--delay <ms>` | Delay in milliseconds between consecutive downloads (default: 0) |
 | `--help` | Display help information |
@@ -95,6 +95,9 @@ ipeds-fetch --years 2010 --tables "*" --list:json
 # Download HD2024 with its data dictionary
 ipeds-fetch --years 2024 --tables HD2024 --with-dictionaries
 
+# Download HD2024 with its data dictionary, converting .xlsx to CSV
+ipeds-fetch --years 2024 --tables HD2024 --with-dictionaries:text
+
 # Download all enrollment tables for 2020-2024 with 500ms delay between downloads
 ipeds-fetch --years 2020-2024 --tables "EF*" --delay 500 --output ./enrollment-data
 
@@ -115,6 +118,7 @@ import {
     downloadTables,
     downloadZipAndExtract,
     parseYearSpec,
+    type DictionaryFormat,
 } from "@centoic/ipeds-fetch";
 ```
 
@@ -161,6 +165,7 @@ const fileCount = await downloadTables({
     tables: filtered,
     outputDir: "./data",
     withDictionaries: true,
+    dictionaryFormat: "text",
     delayMs: 500,
     onProgress: (msg) => console.log(msg),
     onWarning: (msg) => console.warn(msg),
@@ -192,6 +197,7 @@ interface DownloadTablesOptions {
     tables: TableMetadata[];
     outputDir: string;
     withDictionaries?: boolean;
+    dictionaryFormat?: "original" | "text";
     delayMs?: number;
     onProgress?: (message: string) => void;
     onWarning?: (message: string) => void;
@@ -204,6 +210,15 @@ interface DownloadItemResult {
     success: boolean;
     files: ExtractedFile[];
     error?: DownloadErrorInfo;
+}
+
+interface DownloadErrorInfo {
+    message: string;
+    category: "download" | "extraction" | "conversion";
+    url: string;
+    isHttpError: boolean;
+    httpStatus?: number;
+    httpStatusText?: string;
 }
 ```
 
@@ -231,7 +246,7 @@ The IPEDS Data Center uses ASP.NET WebForms with no public API. This tool uses P
 2. Selects the requested year from the dropdown
 3. Scrapes the resulting table listing (survey, title, table name, download URLs)
 4. Downloads zip files for matching tables
-5. Extracts CSV data files and XLSX/XLS dictionaries
+5. Extracts CSV data files and XLSX/XLS dictionaries (optionally converting .xlsx to CSV)
 
 ## Disclaimer
 

@@ -1,9 +1,22 @@
-import type { CliOptions, ListFormat, ParseResult } from "./types.js";
+import type {
+    CliOptions,
+    DictionaryFormat,
+    ListFormat,
+    ParseResult,
+} from "./types.js";
 
 const listFormats: ListFormat[] = ["text", "json", "tsv"];
+const dictionaryFormats: DictionaryFormat[] = ["text"];
 
 const isListArg = (value: string): boolean => {
     return value === "--list" || value.startsWith("--list:");
+};
+
+const isWithDictionariesArg = (value: string): boolean => {
+    return (
+        value === "--with-dictionaries" ||
+        value.startsWith("--with-dictionaries:")
+    );
 };
 
 const parseListFormat = (
@@ -20,6 +33,23 @@ const parseListFormat = (
 
     return {
         error: `Invalid list format "${rawFormat}". Use text, json, or tsv.`,
+    };
+};
+
+const parseDictionaryFormat = (
+    value: string
+): { format?: DictionaryFormat; error?: string } => {
+    if (value === "--with-dictionaries") {
+        return { format: "original" };
+    }
+
+    const rawFormat = value.slice("--with-dictionaries:".length).trim();
+    if (dictionaryFormats.includes(rawFormat as DictionaryFormat)) {
+        return { format: rawFormat as DictionaryFormat };
+    }
+
+    return {
+        error: `Invalid dictionary format "${rawFormat}". Use text.`,
     };
 };
 
@@ -52,6 +82,7 @@ export const parseCliArgs = (args: string[], cwd: string): ParseResult => {
     const errors: string[] = [];
     const options: CliOptions = {
         withDictionaries: false,
+        dictionaryFormat: "original",
         outputDir: cwd,
         help: false,
         version: false,
@@ -73,8 +104,14 @@ export const parseCliArgs = (args: string[], cwd: string): ParseResult => {
             continue;
         }
 
-        if (arg === "--with-dictionaries") {
-            options.withDictionaries = true;
+        if (isWithDictionariesArg(arg)) {
+            const result = parseDictionaryFormat(arg);
+            if (result.error) {
+                errors.push(result.error);
+            } else {
+                options.withDictionaries = true;
+                options.dictionaryFormat = result.format ?? "original";
+            }
             index += 1;
             continue;
         }

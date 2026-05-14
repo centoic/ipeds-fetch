@@ -194,6 +194,7 @@ export const handleDownload = async (options: CliOptions): Promise<void> => {
         tables: filteredTables,
         outputDir: options.outputDir,
         withDictionaries: options.withDictionaries,
+        dictionaryFormat: options.dictionaryFormat,
         delayMs: options.delayMs,
         onProgress,
         onWarning,
@@ -215,7 +216,12 @@ export const handleDownload = async (options: CliOptions): Promise<void> => {
                 result.type === "dictionary"
                     ? `${table.tableName} dictionary`
                     : table.tableName;
-            const action = error.category === "extraction" ? "extract" : "download";
+            const action =
+                error.category === "extraction"
+                    ? "extract"
+                    : error.category === "conversion"
+                      ? "convert"
+                      : "download";
             const detailLabel = error.isHttpError ? "HTTP Status" : "Details";
             const detailValue = error.isHttpError
                 ? `${error.httpStatus ?? ""} ${error.httpStatusText ?? ""}`.trim()

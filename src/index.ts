@@ -1,5 +1,10 @@
 export { runCli } from "./cli/cli.js";
-export type { CliOptions, ListFormat, ParseResult } from "./cli/types.js";
+export type {
+    CliOptions,
+    DictionaryFormat,
+    ListFormat,
+    ParseResult,
+} from "./cli/types.js";
 export type { ParseYearSpecResult } from "./lib/parse-year-spec.js";
 export { parseYearSpec } from "./lib/parse-year-spec.js";
 export { fetchTablesForYears } from "./lib/scrape-tables.js";

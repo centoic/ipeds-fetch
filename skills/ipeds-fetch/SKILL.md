@@ -30,7 +30,7 @@ Common survey categories and their table prefixes:
 | `HR` | Human Resources | Employees by occupation, salaries, tenure |
 | `FLAGS` | Flags | Metadata indicating which surveys an institution completed |
 
-This CLI tool scrapes the IPEDS ASP.NET WebForms site via Playwright browser automation (no public REST API exists) to download CSV data files and XLSX/XLS data dictionaries.
+This CLI tool scrapes the IPEDS ASP.NET WebForms site via Playwright browser automation (no public REST API exists) to download CSV data files and XLSX/XLS data dictionaries (optionally converted to CSV).
 
 ---
 
@@ -66,7 +66,7 @@ npx @centoic/ipeds-fetch --years <spec> --tables <patterns> [options]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--list[:format]` | — | List matching tables instead of downloading. Formats: `text` (default), `json`, `tsv` |
-| `--with-dictionaries` | false | Also download data dictionaries (.xlsx/.xls) for each table |
+| `--with-dictionaries[:format]` | false | Also download data dictionaries (.xlsx/.xls). Use `:text` to convert .xlsx to CSV |
 | `--output <dir>` | cwd | Output directory for downloaded files (created if needed) |
 | `--delay <ms>` | 0 | Delay in milliseconds between consecutive downloads |
 | `--help` | — | Display help information |
@@ -130,6 +130,9 @@ npx @centoic/ipeds-fetch --years 2024 --tables HD2024 --output ./data
 # Download with data dictionary (essential for understanding column meanings)
 npx @centoic/ipeds-fetch --years 2024 --tables HD2024 --with-dictionaries --output ./data
 
+# Download with data dictionary converted to CSV for easier reading
+npx @centoic/ipeds-fetch --years 2024 --tables HD2024 --with-dictionaries:text --output ./data
+
 # Download all enrollment data across a year range
 npx @centoic/ipeds-fetch --years 2020-2024 --tables "EF*" --output ./enrollment-data
 
@@ -150,10 +153,33 @@ npx @centoic/ipeds-fetch --years 2000-2024 --tables "HD*" --delay 500 --output .
 
 ### 4. Get Data Dictionaries
 
-Data dictionaries (XLSX/XLS) explain each column in the CSV. Always download them when interpreting data:
+Data dictionaries explain each column in the CSV data files. They are **essential** — always download them when interpreting data.
+
+**Dictionary formats by year:**
+
+| Era | Years | Format |
+|-----|-------|--------|
+| Recent | ~2013–present | `.xlsx` (Excel 2007+) |
+| Recent past | ~2000–2012 | `.xls` (legacy Excel) |
+| Distant past | ~1980–1999 | `.html` |
+
+**Conversion to text (CSV):**
+
+- `.xlsx` dictionaries **can** be converted to CSV with `--with-dictionaries:text`. Multi-sheet workbooks are split into separate CSV files (one per sheet).
+- `.xls` dictionaries **cannot** currently be converted to CSV. The tool will emit a warning and keep the original `.xls` file. This is a known limitation.
+- `.html` dictionaries are already plain text and require no conversion.
+
+**Recommendation:** Prefer text format (`--with-dictionaries:text` or `dictionaryFormat: "text"`) unless you specifically need the original Excel files. CSV and HTML are much easier for LLMs and scripts to read natively without external dependencies.
 
 ```bash
+# Download original format dictionaries (mixed .xlsx, .xls, .html)
 npx @centoic/ipeds-fetch --years 2024 --tables EF2024A --with-dictionaries --output ./data
+
+# Convert .xlsx dictionaries to CSV, keep .xls and .html as-is
+npx @centoic/ipeds-fetch --years 2024 --tables EF2024A --with-dictionaries:text --output ./data
+
+# For older years with .xls dictionaries, use original format:
+npx @centoic/ipeds-fetch --years 2010 --tables EF2010A --with-dictionaries --output ./data
 ```
 
 ---
@@ -170,6 +196,7 @@ import {
     downloadTables,
     downloadZipAndExtract,
     parseYearSpec,
+    type DictionaryFormat,
 } from "@centoic/ipeds-fetch";
 
 // Parse year specifications
@@ -188,6 +215,7 @@ const fileCount = await downloadTables({
     tables: filtered,
     outputDir: "./data",
     withDictionaries: true,
+    dictionaryFormat: "text",
     delayMs: 500,
     onProgress: (msg) => console.log(msg),
     onWarning: (msg) => console.warn(msg),
@@ -215,6 +243,7 @@ interface DownloadTablesOptions {
     tables: TableMetadata[];
     outputDir: string;
     withDictionaries?: boolean;
+    dictionaryFormat?: "original" | "text";
     delayMs?: number;
     onProgress?: (message: string) => void;
     onWarning?: (message: string) => void;
@@ -227,6 +256,15 @@ interface DownloadItemResult {
     success: boolean;
     files: ExtractedFile[];
     error?: DownloadErrorInfo;
+}
+
+interface DownloadErrorInfo {
+    message: string;
+    category: "download" | "extraction" | "conversion";
+    url: string;
+    isHttpError: boolean;
+    httpStatus?: number;
+    httpStatusText?: string;
 }
 ```
 
@@ -244,12 +282,25 @@ interface DownloadItemResult {
 
 ---
 
+## Working with Large Data Files
+
+IPEDS data files are often **very large** (many contain thousands of columns and tens of thousands of rows). When using an LLM to analyze downloaded data:
+
+- **Do not read entire files directly**. Files can range from several MB to over 100 MB and will overwhelm context windows.
+- **Preview with small slices**. Use `head -20` or equivalent to inspect the first few rows and understand column structure before deeper analysis.
+- **Use code for processing**. Write scripts (Python/R/Node.js) to filter, aggregate, or sample data rather than attempting to load full files into the LLM's context.
+- **Consult the dictionary first**. Read the data dictionary to identify the specific columns you need before loading the full data file.
+- **Sample representative rows**. Use `head`, `tail`, or random sampling to inspect a few rows at a time rather than reading the entire dataset.
+
+---
+
 ## Tips
 
 1. **Start with `--list`**: Discover what exists before downloading. This prevents downloading irrelevant or non-existent tables.
 2. **Use JSON for scripting**: `--list:json` gives structured output including full download URLs.
-3. **Always download dictionaries**: The XLSX files explain column codes, value meanings, and survey methodology.
+3. **Always download dictionaries**: The XLSX/XLS/HTML files explain column codes, value meanings, and survey methodology. Use `--with-dictionaries:text` to get CSV files — text formats are much easier for LLMs to read than binary Excel files.
 4. **Match by prefix**: IPEDS tables follow `[Prefix][Year][Suffix]` naming (e.g., `EF2024A`). Use `--list` with `*` to see exact names.
 5. **Use `--delay` for bulk downloads**: A 500ms delay is courteous when downloading many files across many years.
 6. **Output directory is auto-created**: `--output` will create any missing directories (including parents).
 7. **Wildcard is inclusive**: `EF*` matches `EF2024A`, `EF2024B`, `EFFY2024`, etc. Combine with year for precision: `EF2024*`.
+8. **Data files are large**: IPEDS CSVs often have thousands of columns and can be 50-100 MB. Use `head`, `cut`, or scripts to preview and filter rather than reading entire files directly.

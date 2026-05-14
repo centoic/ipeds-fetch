@@ -1,10 +1,19 @@
 import fs from "node:fs";
-import { mkdir, mkdtemp, rm, stat, writeFile, unlink } from "node:fs/promises";
+import {
+    mkdir,
+    mkdtemp,
+    readFile,
+    rm,
+    stat,
+    unlink,
+    writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import * as unzipper from "unzipper";
+import * as XLSX from "xlsx";
 
 import type { TableMetadata } from "./types.js";
 
@@ -20,7 +29,7 @@ export interface DownloadZipResult {
 
 export interface DownloadErrorInfo {
     message: string;
-    category: "download" | "extraction";
+    category: "download" | "extraction" | "conversion";
     url: string;
     isHttpError: boolean;
     httpStatus?: number;
@@ -38,6 +47,7 @@ export interface DownloadTablesOptions {
     tables: TableMetadata[];
     outputDir: string;
     withDictionaries?: boolean;
+    dictionaryFormat?: "original" | "text";
     delayMs?: number;
     onProgress?: (message: string) => void;
     onWarning?: (message: string) => void;
@@ -57,7 +67,7 @@ const delayFn = async (delayMs: number): Promise<void> => {
 class IpedsFetchError extends Error {
     constructor(
         message: string,
-        public readonly category: "download" | "extraction",
+        public readonly category: "download" | "extraction" | "conversion",
         public readonly httpStatus?: number,
         public readonly httpStatusText?: string
     ) {
@@ -75,6 +85,61 @@ const checkDirectoryWritable = async (dir: string): Promise<void> => {
         throw new Error(
             `Output directory is not writable: ${dir}\n  Details: ${details}`
         );
+    }
+};
+
+const formatSize = (sizeBytes: number): string => {
+    return sizeBytes >= 1024 * 1024
+        ? `${(sizeBytes / (1024 * 1024)).toFixed(1)} MB`
+        : `${Math.max(1, Math.round(sizeBytes / 1024))} KB`;
+};
+
+const sanitizeWorksheetName = (name: string): string => {
+    const sanitized = name
+        .replace(/\s+/g, "_")
+        .replace(/[<>:"/\\|?*']/g, "_")
+        .replace(/./g, (character) =>
+            character.charCodeAt(0) < 32 ? "_" : character
+        )
+        .trim();
+    return sanitized || "Sheet";
+};
+
+const convertXlsxDictionaryToCsv = async (
+    filePath: string,
+    outputDir: string
+): Promise<ExtractedFile[]> => {
+    try {
+        const workbook = XLSX.read(await readFile(filePath), {
+            type: "buffer",
+        });
+        const baseName = path.basename(filePath, path.extname(filePath));
+        const convertedFiles: ExtractedFile[] = [];
+
+        for (const worksheetName of workbook.SheetNames) {
+            const worksheet = workbook.Sheets[worksheetName];
+            if (!worksheet) {
+                continue;
+            }
+
+            const csv = XLSX.utils.sheet_to_csv(worksheet);
+            const csvFileName = `${baseName}_${sanitizeWorksheetName(
+                worksheetName
+            )}.csv`;
+            const csvPath = path.join(outputDir, csvFileName);
+            await writeFile(csvPath, csv);
+            const fileStats = await stat(csvPath);
+            convertedFiles.push({
+                fileName: csvFileName,
+                sizeBytes: fileStats.size,
+            });
+        }
+
+        await unlink(filePath);
+        return convertedFiles;
+    } catch (error) {
+        const details = error instanceof Error ? error.message : String(error);
+        throw new IpedsFetchError(details, "conversion");
     }
 };
 
@@ -174,6 +239,7 @@ export const downloadTables = async (
         tables,
         outputDir,
         withDictionaries = false,
+        dictionaryFormat = "original",
         delayMs,
         onProgress,
         onWarning,
@@ -239,21 +305,18 @@ export const downloadTables = async (
 
         try {
             const result = await downloadZipAndExtract(url, outputDir);
+            let totalSize = 0;
 
             if (result.files.length === 0) {
-                onProgress?.(` done (0 KB)\n`);
                 onWarning?.(`Warning: No files extracted for ${fileLabel}.`);
             } else {
-                const totalSize = result.files.reduce(
+                totalSize = result.files.reduce(
                     (sum, file) => sum + file.sizeBytes,
                     0
                 );
-                const sizeStr =
-                    totalSize >= 1024 * 1024
-                        ? `${(totalSize / (1024 * 1024)).toFixed(1)} MB`
-                        : `${Math.max(1, Math.round(totalSize / 1024))} KB`;
-                onProgress?.(` done (${sizeStr})\n`);
             }
+
+            onProgress?.(` done (${formatSize(totalSize)})\n`);
 
             if (result.files.length > 1) {
                 const fileList = result.files
@@ -264,11 +327,55 @@ export const downloadTables = async (
                 );
             }
 
-            downloadedFiles += result.files.length;
+            let itemFiles = result.files;
+
+            if (isDictionary && dictionaryFormat === "text") {
+                try {
+                    for (const file of result.files) {
+                        const extension = path
+                            .extname(file.fileName)
+                            .toLowerCase();
+                        const filePath = path.join(outputDir, file.fileName);
+
+                        if (extension === ".xlsx") {
+                            const convertedFiles =
+                                await convertXlsxDictionaryToCsv(
+                                    filePath,
+                                    outputDir
+                                );
+                            const convertedSize = convertedFiles.reduce(
+                                (sum, convertedFile) =>
+                                    sum + convertedFile.sizeBytes,
+                                0
+                            );
+                            onProgress?.(
+                                `  Converting ${file.fileName} to CSV... ${
+                                    convertedFiles.length
+                                } files (${formatSize(convertedSize)})\n`
+                            );
+                            itemFiles = itemFiles
+                                .filter(
+                                    (itemFile) =>
+                                        itemFile.fileName !== file.fileName
+                                )
+                                .concat(convertedFiles);
+                        } else if (extension === ".xls") {
+                            onWarning?.(
+                                `Warning: ${file.fileName} is a legacy .xls dictionary; text conversion is not yet supported.`
+                            );
+                        }
+                    }
+                } catch (error) {
+                    downloadedFiles += itemFiles.length;
+                    throw error;
+                }
+            }
+
+            downloadedFiles += itemFiles.length;
             onItemComplete?.(table, {
                 type: item.type,
                 success: true,
-                files: result.files,
+                files: itemFiles,
             });
         } catch (error) {
             const errorMessage =
@@ -276,6 +383,8 @@ export const downloadTables = async (
             const isExtract =
                 error instanceof IpedsFetchError &&
                 error.category === "extraction";
+            const category =
+                error instanceof IpedsFetchError ? error.category : "download";
             const isHttpError =
                 error instanceof IpedsFetchError &&
                 error.httpStatus !== undefined;
@@ -286,7 +395,7 @@ export const downloadTables = async (
                 files: [],
                 error: {
                     message: errorMessage,
-                    category: isExtract ? "extraction" : "download",
+                    category: isExtract ? "extraction" : category,
                     url,
                     isHttpError,
                     httpStatus:

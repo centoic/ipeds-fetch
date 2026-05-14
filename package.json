@@ -38,7 +38,7 @@
     },
     "scripts": {
         "build": "tsc",
-        "prepare": "npm run build",
+        "prepare": "tsc",
         "lint": "eslint .",
         "typecheck": "tsc --noEmit"
     },

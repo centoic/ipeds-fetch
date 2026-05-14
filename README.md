@@ -211,16 +211,16 @@ interface DownloadItemResult {
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Type check
-npm run typecheck
+pnpm run typecheck
 
 # Lint
-npm run lint
+pnpm run lint
 
 # Build (compiles src/ to dist/)
-npm run build
+pnpm run build
 ```
 
 ## How It Works

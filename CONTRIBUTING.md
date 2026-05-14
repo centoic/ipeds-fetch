@@ -7,20 +7,21 @@ Thanks for your interest in contributing to `@centoic/ipeds-fetch`.
 ```bash
 git clone https://github.com/centoic/ipeds-fetch.git
 cd ipeds-fetch
-npm install
+pnpm install
 ```
 
 ### Prerequisites
 
 - Node.js >= 20
+- pnpm (install via `npm install -g pnpm`)
 - Playwright browsers: `npx playwright install chromium`
 
 ### Verify Your Setup
 
 ```bash
-npm run typecheck
-npm run lint
-npm run build
+pnpm run typecheck
+pnpm run lint
+pnpm run build
 ```
 
 ## Project Structure
@@ -34,16 +35,16 @@ src/
 
 ## Scripts
 
-| Command             | Description                   |
-| ------------------- | ----------------------------- |
-| `npm run build`     | Compile TypeScript to `dist/` |
-| `npm run typecheck` | Type check without emitting   |
-| `npm run lint`      | Run ESLint                    |
+| Command              | Description                   |
+| -------------------- | ----------------------------- |
+| `pnpm run build`     | Compile TypeScript to `dist/` |
+| `pnpm run typecheck` | Type check without emitting   |
+| `pnpm run lint`      | Run ESLint                    |
 
 ## Before Submitting
 
-- Ensure `npm run typecheck` passes
-- Ensure `npm run lint` passes
+- Ensure `pnpm run typecheck` passes
+- Ensure `pnpm run lint` passes
 - Keep changes focused and minimal
 - Follow existing code style (4-space indent, arrow functions, explicit types)
 

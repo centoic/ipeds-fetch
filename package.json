@@ -43,20 +43,20 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@eslint/js": "^9.0.0",
-        "@tsconfig/node20": "^20.1.4",
-        "@types/node": "^20.0.0",
-        "@types/unzipper": "^0.10.10",
-        "eslint": "^9.0.0",
-        "globals": "^16.0.0",
+        "@eslint/js": "9.39.4",
+        "@tsconfig/node20": "20.1.9",
+        "@types/node": "20.19.41",
+        "@types/unzipper": "0.10.11",
+        "eslint": "9.39.4",
+        "globals": "16.5.0",
         "prettier": "2.8.8",
-        "typescript": "^5.0.0",
-        "typescript-eslint": "^8.0.0"
+        "typescript": "5.9.3",
+        "typescript-eslint": "8.59.3"
     },
     "dependencies": {
-        "playwright": "^1.58.1",
-        "unzipper": "^0.12.3",
-        "xlsx": "^0.18.5"
+        "playwright": "1.60.0",
+        "unzipper": "0.12.3",
+        "xlsx": "0.18.5"
     },
     "pnpm": {
         "onlyBuiltDependencies": []

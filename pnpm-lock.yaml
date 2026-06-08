@@ -9,41 +9,41 @@ importers:
   .:
     dependencies:
       playwright:
-        specifier: ^1.58.1
+        specifier: 1.60.0
         version: 1.60.0
       unzipper:
-        specifier: ^0.12.3
+        specifier: 0.12.3
         version: 0.12.3
       xlsx:
-        specifier: ^0.18.5
+        specifier: 0.18.5
         version: 0.18.5
     devDependencies:
       '@eslint/js':
-        specifier: ^9.0.0
+        specifier: 9.39.4
         version: 9.39.4
       '@tsconfig/node20':
-        specifier: ^20.1.4
+        specifier: 20.1.9
         version: 20.1.9
       '@types/node':
-        specifier: ^20.0.0
+        specifier: 20.19.41
         version: 20.19.41
       '@types/unzipper':
-        specifier: ^0.10.10
+        specifier: 0.10.11
         version: 0.10.11
       eslint:
-        specifier: ^9.0.0
+        specifier: 9.39.4
         version: 9.39.4
       globals:
-        specifier: ^16.0.0
+        specifier: 16.5.0
         version: 16.5.0
       prettier:
         specifier: 2.8.8
         version: 2.8.8
       typescript:
-        specifier: ^5.0.0
+        specifier: 5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.0.0
+        specifier: 8.59.3
         version: 8.59.3(eslint@9.39.4)(typescript@5.9.3)
 
 packages:

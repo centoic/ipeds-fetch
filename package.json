@@ -51,10 +51,10 @@
         "globals": "16.5.0",
         "prettier": "2.8.8",
         "typescript": "5.9.3",
-        "typescript-eslint": "8.59.3"
+        "typescript-eslint": "8.61.0"
     },
     "dependencies": {
-        "playwright": "1.60.0",
+        "playwright": "1.61.0",
         "unzipper": "0.12.3",
         "xlsx": "0.18.5"
     },

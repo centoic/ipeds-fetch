@@ -55,7 +55,7 @@
     },
     "dependencies": {
         "playwright": "1.60.0",
-        "unzipper": "0.12.3",
+        "unzipper": "0.12.5",
         "xlsx": "0.18.5"
     },
     "pnpm": {

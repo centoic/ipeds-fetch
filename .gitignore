@@ -2,7 +2,3 @@
 node_modules/
 dist/
 *.tsbuildinfo
-
-# Interim dev docs and specs created by and for LLMs to work on the project
-_docs/
-

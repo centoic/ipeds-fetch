@@ -32,4 +32,3 @@ jobs:
 
             - name: Audit for high-severity vulnerabilities
               run: pnpm audit --audit-level high
-              continue-on-error: true

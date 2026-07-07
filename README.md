@@ -8,7 +8,7 @@ A command-line tool and TypeScript library for downloading data files and data d
 
 ## Prerequisites
 
-- **Node.js >= 20**
+- **Node.js >= 22**
 - **Playwright browsers**: This tool uses Playwright to interact with the IPEDS ASP.NET WebForms site. Install the Chromium browser before first use:
 
   ```bash

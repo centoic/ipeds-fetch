@@ -55,7 +55,7 @@
         "typescript-eslint": "8.67.0"
     },
     "dependencies": {
-        "playwright": "1.62.1",
+        "playwright": "1.63.0",
         "unzipper": "0.12.5",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     },
@@ -64,7 +64,7 @@
         "overrides": {
             "brace-expansion@<2": "1.1.18",
             "brace-expansion@>=4": "5.0.9",
-            "js-yaml": "4.3.1"
+            "js-yaml": "4.3.2"
         }
     },
     "packageManager": "pnpm@10.33.4"

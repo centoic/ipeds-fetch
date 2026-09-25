@@ -63,7 +63,8 @@
         "onlyBuiltDependencies": [],
         "overrides": {
             "brace-expansion@<2": "1.1.18",
-            "brace-expansion@>=4": "5.0.9"
+            "brace-expansion@>=4": "5.0.9",
+            "js-yaml": "4.3.2"
         }
     },
     "packageManager": "pnpm@10.33.4"

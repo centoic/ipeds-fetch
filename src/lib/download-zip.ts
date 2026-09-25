@@ -83,7 +83,8 @@ const checkDirectoryWritable = async (dir: string): Promise<void> => {
     } catch (error) {
         const details = error instanceof Error ? error.message : String(error);
         throw new Error(
-            `Output directory is not writable: ${dir}\n  Details: ${details}`
+            `Output directory is not writable: ${dir}\n  Details: ${details}`,
+            { cause: error }
         );
     }
 };

@@ -160,7 +160,8 @@ export const fetchTablesForYears = async (
                 const details =
                     error instanceof Error ? error.message : String(error);
                 throw new Error(
-                    `Network request failed while fetching table list for year ${year}.\n  URL: ${BASE_URL}/DataFiles.aspx\n  Details: ${details}`
+                    `Network request failed while fetching table list for year ${year}.\n  URL: ${BASE_URL}/DataFiles.aspx\n  Details: ${details}`,
+                    { cause: error }
                 );
             }
         }
@@ -177,7 +178,8 @@ export const fetchTablesForYears = async (
         }
         const details = error instanceof Error ? error.message : String(error);
         throw new Error(
-            `Network request failed while fetching table list.\n  URL: ${BASE_URL}/DataFiles.aspx\n  Details: ${details}`
+            `Network request failed while fetching table list.\n  URL: ${BASE_URL}/DataFiles.aspx\n  Details: ${details}`,
+            { cause: error }
         );
     } finally {
         if (browser) {

@@ -1,5 +1,2 @@
 packages:
     - "."
-minimumReleaseAgeExclude:
-    # js-jaml prior versions have CVE-2026-59870
-    - js-yaml@4.3.1
